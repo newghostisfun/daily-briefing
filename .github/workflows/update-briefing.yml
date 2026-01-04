@@ -2,9 +2,14 @@ name: Update Alexa briefing
 
 on:
   schedule:
-    # Runs daily at 07:10 UTC (07:10 UK during winter)
-    - cron: "10 7 * * *"
+    # Weekdays (Mon–Fri): 06:50 UK time
+    - cron: "50 6 * * 1-5"
+
+    # Weekends (Sat–Sun): 07:50 UK time
+    - cron: "50 7 * * 6,0"
+
   workflow_dispatch: {}
+
 
 permissions:
   contents: write
