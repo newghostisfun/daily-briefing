@@ -7,13 +7,23 @@
     <language>en-gb</language>
 
     <item>
-      <title>Daily Briefing – Placeholder</title>
-      <description>
-        Good morning. This is your daily briefing.
-        No updates yet. Your first real briefing will appear tomorrow.
-      </description>
-      <pubDate>Fri, 03 Jan 2026 08:00:00 GMT</pubDate>
-    </item>
+      <title>Daily Briefing</title>
+      <description><![CDATA[
+Good morning. Here is your morning analyst briefing.
+
+Venezuela update.
+No further confirmed US military action overnight. Venezuelan officials continue to reject US authority. The United Kingdom has not issued a new operational statement.
+
+Legal and docket watch.
+No new Epstein related court filings or continuances in the last 24 hours.
+
+What to watch today.
+Any shift in UK language toward NATO coordination or United Nations engagement.
+
+End of briefing.
+]]></description>
+  <pubDate>Sat, 04 Jan 2026 08:00:00 GMT</pubDate>
+</item>
 
   </channel>
 </rss>
