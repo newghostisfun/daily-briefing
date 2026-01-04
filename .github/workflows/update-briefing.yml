@@ -2,8 +2,7 @@ name: Update Alexa briefing
 
 on:
   schedule:
-    # GitHub cron runs in UTC.
-    # This is 07:10 UK time during winter (GMT).
+    # Runs daily at 07:10 UTC (07:10 UK during winter)
     - cron: "10 7 * * *"
   workflow_dispatch: {}
 
@@ -14,7 +13,7 @@ jobs:
   update:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Set up Python
@@ -37,4 +36,3 @@ jobs:
           git add briefing.xml
           git diff --cached --quiet || git commit -m "Update daily briefing"
           git push
-
