@@ -2,12 +2,12 @@
 <rss version="2.0">
   <channel>
     <title>Morning Briefing</title>
-    <link>https://example.com</link>
+    <link>https://newghostisfun.github.io/daily-briefing/</link>
     <description>Private daily briefing</description>
     <language>en-gb</language>
 
     <item>
-      <title>Daily Briefing</title>
+      <title>Daily Briefing - Sat 04 Jan 2026</title>
       <description><![CDATA[Good morning. Here is your morning analyst briefing.
 
 Venezuela update.
@@ -19,11 +19,12 @@ No new Epstein related court filings or continuances in the last 24 hours.
 What to watch today.
 Any shift in UK language toward NATO coordination or United Nations engagement.
 
-End of briefing.
-]]></description>
-  <pubDate>Sat, 04 Jan 2026 08:00:00 GMT</pubDate>
-</item>
+End of briefing.]]></description>
+      <pubDate>Sat, 04 Jan 2026 08:00:00 GMT</pubDate>
+      <guid isPermaLink="false">mj-briefing-2026-01-04</guid>
+    </item>
 
   </channel>
 </rss>
+
 
