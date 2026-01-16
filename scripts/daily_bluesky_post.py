@@ -49,9 +49,15 @@ def openai_generate_post(api_key: str, model: str) -> str:
         "input": prompt,
     }
 
-    r = requests.post(OPENAI_URL, headers=headers, data=json.dumps(payload), timeout=60)
-    r.raise_for_status()
-    data = r.json()
+   r = requests.post(OPENAI_URL, headers=headers, json=payload, timeout=60)
+
+   # If OpenAI returns a 400, print the body so we can see the real reason in Actions logs.
+   if r.status_code >= 400:
+      print("OpenAI error status:", r.status_code)
+      print("OpenAI error body:", r.text)
+      r.raise_for_status()
+
+   data = r.json()
 
     # Responses API output parsing:
     # We search for the first text content chunk.
