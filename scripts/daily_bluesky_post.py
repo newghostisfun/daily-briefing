@@ -79,3 +79,27 @@ Output ONLY the post text.
             raise RuntimeError("Generated text used first-person voice.")
 
     return text
+    def main():
+    handle = require_env("BLUESKY_HANDLE")
+    app_pw = require_env("BLUESKY_APP_PASSWORD")
+    openai_key = require_env("OPENAI_API_KEY")
+    model = os.getenv("OPENAI_MODEL") or "gpt-5.2"
+
+    print("Handle:", handle)
+
+    post_text = openai_generate_post(openai_key, model)
+    print("Generated post:", post_text)
+
+    session = bluesky_create_session(handle, app_pw)
+    print("Session DID:", session["did"])
+
+    access_jwt = session["accessJwt"]
+    repo_did = session["did"]
+
+    res = bluesky_create_post(access_jwt, repo_did, post_text)
+    print("POST RESULT:", res)
+
+
+if __name__ == "__main__":
+    main()
+
