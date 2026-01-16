@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import os
-import json
 import requests
 from datetime import datetime, timezone
 
@@ -13,7 +12,6 @@ BSKY_PDS = "https://bsky.social"
 CREATE_SESSION = f"{BSKY_PDS}/xrpc/com.atproto.server.createSession"
 CREATE_RECORD = f"{BSKY_PDS}/xrpc/com.atproto.repo.createRecord"
 
-
 # --------------------
 # Helpers
 # --------------------
@@ -22,7 +20,6 @@ def require_env(name: str) -> str:
     if not value:
         raise RuntimeError(f"Missing required environment variable: {name}")
     return value
-
 
 # --------------------
 # OpenAI generation
@@ -39,7 +36,7 @@ Rules:
 - No first-person voice
 - Calm, analytic, non-alarmist
 - Mention global risk posture and whether narrative matches verified action
-- 240–300 characters (hard max 300)
+- Target length: about 180 characters (acceptable range 160–200). Hard max 200.
 
 Output ONLY the post text.
 """.strip()
@@ -89,9 +86,9 @@ Output ONLY the post text.
         else:
             text = "#tank " + text
 
-    # Enforce length
-    if len(text) > 300:
-        text = text[:297].rstrip() + "..."
+    # Enforce length (hard cap 200 chars)
+    if len(text) > 200:
+        text = text[:197].rstrip() + "..."
 
     # Safety checks
     lowered = text.lower()
@@ -113,7 +110,6 @@ Output ONLY the post text.
 
     return text
 
-
 # --------------------
 # Bluesky API
 # --------------------
@@ -125,7 +121,6 @@ def bluesky_create_session(handle: str, app_password: str) -> dict:
     )
     r.raise_for_status()
     return r.json()
-
 
 def bluesky_create_post(access_jwt: str, repo_did: str, text: str) -> dict:
     record = {
@@ -146,7 +141,6 @@ def bluesky_create_post(access_jwt: str, repo_did: str, text: str) -> dict:
     )
     r.raise_for_status()
     return r.json()
-
 
 # --------------------
 # Main
@@ -172,7 +166,6 @@ def main():
     )
 
     print("POSTED:", result.get("uri"))
-
 
 if __name__ == "__main__":
     main()
