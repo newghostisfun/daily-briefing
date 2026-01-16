@@ -64,17 +64,17 @@ Output ONLY the post text.
 
     # Enforce prefixes
     if flagged:
-        if not text.startswith("#DStank SPECIAL:"):
-            if text.startswith("#DTtank "):
-                text = "#DVtank SPECIAL: " + text[len("#DXtank "):].lstrip()
+        if not text.startswith("#tank [DS] SPECIAL:"):
+            if text.startswith("#tank [DT] "):
+                text = "#tank [DV] SPECIAL: " + text[len("#tank [DX] "):].lstrip()
             else:
-                text = "#DJtank SPECIAL: " + text
+                text = "#tank [DJ] SPECIAL: " + text
     else:
-        if not text.startswith("#DStank "):
-            if text.startswith("#DTtank"):
-                text = "#DVtank " + text[len("#DXtank"):].lstrip()
+        if not text.startswith("#tank [DS] "):
+            if text.startswith("#tank [DT] "):
+                text = "#tank [DT] " + text[len("#tank [DT] "):].lstrip()
             else:
-                text = "#DJtank " + text
+                text = "#tank [DJ] " + text
 
     # Word-safe truncation (no mid-word cuts)
     if len(text) > 200:
