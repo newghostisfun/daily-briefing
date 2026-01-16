@@ -79,7 +79,7 @@ Output ONLY the post text.
             raise RuntimeError("Generated text used first-person voice.")
 
     return text
-    def main():
+def main():
     handle = require_env("BLUESKY_HANDLE")
     app_pw = require_env("BLUESKY_APP_PASSWORD")
     openai_key = require_env("OPENAI_API_KEY")
