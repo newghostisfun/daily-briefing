@@ -62,19 +62,20 @@ Output ONLY the post text.
 
     text = text.strip()
 
-    # Enforce prefixes
-    if flagged:
-        if not text.startswith("#tank [DS] SPECIAL:"):
-            if text.startswith("#tank [DT] "):
-                text = "#tank [DV] SPECIAL: " + text[len("#tank [DX] "):].lstrip()
-            else:
-                text = "#tank [DJ] SPECIAL: " + text
+# Enforce prefixes + debug markers
+if flagged:
+    if text.startswith("#tank SPECIAL:"):
+        text = "#tank [DS] SPECIAL: " + text[len("#tank SPECIAL:"):].lstrip()
     else:
-        if not text.startswith("#tank [DS] "):
-            if text.startswith("#tank [DT] "):
-                text = "#tank [DT] " + text[len("#tank [DT] "):].lstrip()
-            else:
-                text = "#tank [DJ] " + text
+        # model didn't follow rules
+        text = "#tank [DJ] SPECIAL: " + text
+else:
+    if text.startswith("#tank "):
+        text = "#tank [DT] " + text[len("#tank "):].lstrip()
+    else:
+        # model didn't follow rules
+        text = "#tank [DJ] " + text
+
 
     # Word-safe truncation (no mid-word cuts)
     if len(text) > 200:
