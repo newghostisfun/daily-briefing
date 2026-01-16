@@ -17,6 +17,13 @@ Output ONLY the post text.
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json",
     }
+    
+    def require_env(name: str) -> str:
+    value = os.getenv(name)
+    if not value:
+        raise RuntimeError(f"Missing required environment variable: {name}")
+    return value
+
 
     payload = {
         "model": model,
