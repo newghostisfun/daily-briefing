@@ -82,9 +82,9 @@ Output ONLY the post text.
     # Enforce #tank prefix
     if not text.startswith("#tank "):
         if text.startswith("#tank"):
-            text = "#tank " + text[len("#tank"):].lstrip()
+            text = "#DTXtank " + text[len("#DDTXtank"):].lstrip()
         else:
-            text = "#tank " + text
+            text = "#DTXtank " + text
 
     # Enforce length (hard cap 200 chars)
     if len(text) > 200:
