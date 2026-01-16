@@ -1,15 +1,46 @@
+#!/usr/bin/env python3
+
+import os
+import json
+import requests
+from datetime import datetime, timezone
+
+# --------------------
+# Constants
+# --------------------
+OPENAI_URL = "https://api.openai.com/v1/responses"
+BSKY_PDS = "https://bsky.social"
+CREATE_SESSION = f"{BSKY_PDS}/xrpc/com.atproto.server.createSession"
+CREATE_RECORD = f"{BSKY_PDS}/xrpc/com.atproto.repo.createRecord"
+
+
+# --------------------
+# Helpers
+# --------------------
+def require_env(name: str) -> str:
+    value = os.getenv(name)
+    if not value:
+        raise RuntimeError(f"Missing required environment variable: {name}")
+    return value
+
+
+# --------------------
+# OpenAI generation
+# --------------------
 def openai_generate_post(api_key: str, model: str) -> str:
     prompt = """
 Write ONE Bluesky post as a neutral, analytic global outlook snapshot.
-Hard rules:
-- Must start with exactly: "#tank " (including the space).
-- Do not use any other hashtags besides #tank.
-- No emojis.
-- No links/URLs.
-- No first-person voice ("I", "me", "my").
-- Tone: calm, decision-oriented, non-alarmist.
-- Content: global risk posture, major theatres, and whether narrative intensity matches verified action.
-- Length: 240–300 characters if possible. Absolute max: 300 characters.
+
+Rules:
+- Must start with exactly: "#tank " (including the space)
+- No other hashtags
+- No emojis
+- No links
+- No first-person voice
+- Calm, analytic, non-alarmist
+- Mention global risk posture and whether narrative matches verified action
+- 240–300 characters (hard max 300)
+
 Output ONLY the post text.
 """.strip()
 
@@ -17,13 +48,6 @@ Output ONLY the post text.
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json",
     }
-    
-    def require_env(name: str) -> str:
-        value = os.getenv(name)
-        if not value:
-            raise RuntimeError(f"Missing required environment variable: {name}")
-        return value
-
 
     payload = {
         "model": model,
@@ -39,8 +63,7 @@ Output ONLY the post text.
     )
 
     if r.status_code >= 400:
-        print("OpenAI error status:", r.status_code)
-        print("OpenAI error body:", r.text)
+        print("OpenAI error:", r.status_code, r.text)
         r.raise_for_status()
 
     data = r.json()
@@ -55,44 +78,86 @@ Output ONLY the post text.
             break
 
     if not text:
-        raise RuntimeError("OpenAI response did not include output text.")
+        raise RuntimeError("No text returned from OpenAI")
 
     text = text.strip()
 
+    # Enforce #tank prefix
     if not text.startswith("#tank "):
         if text.startswith("#tank"):
             text = "#tank " + text[len("#tank"):].lstrip()
         else:
             text = "#tank " + text
 
+    # Enforce length
     if len(text) > 300:
         text = text[:297].rstrip() + "..."
 
+    # Safety checks
     lowered = text.lower()
     if "http://" in lowered or "https://" in lowered or "www." in lowered:
-        raise RuntimeError("Generated text included a URL.")
+        raise RuntimeError("Post contains URL")
 
     hashtags = [w for w in text.split() if w.startswith("#")]
     if any(h.lower() != "#tank" for h in hashtags):
-        raise RuntimeError("Generated text included extra hashtags.")
+        raise RuntimeError("Extra hashtag detected")
 
     for ch in text:
         if 0x1F300 <= ord(ch) <= 0x1FAFF:
-            raise RuntimeError("Generated text included emoji.")
+            raise RuntimeError("Emoji detected")
 
-    padded = f" {text.lower()} "
+    padded = f" {lowered} "
     for bad in (" i ", " me ", " my ", " i'm", " ive ", " i've "):
         if bad in padded:
-            raise RuntimeError("Generated text used first-person voice.")
+            raise RuntimeError("First-person voice detected")
 
     return text
+
+
+# --------------------
+# Bluesky API
+# --------------------
+def bluesky_create_session(handle: str, app_password: str) -> dict:
+    r = requests.post(
+        CREATE_SESSION,
+        json={"identifier": handle, "password": app_password},
+        timeout=30,
+    )
+    r.raise_for_status()
+    return r.json()
+
+
+def bluesky_create_post(access_jwt: str, repo_did: str, text: str) -> dict:
+    record = {
+        "$type": "app.bsky.feed.post",
+        "text": text,
+        "createdAt": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+    }
+
+    r = requests.post(
+        CREATE_RECORD,
+        headers={"Authorization": f"Bearer {access_jwt}"},
+        json={
+            "repo": repo_did,
+            "collection": "app.bsky.feed.post",
+            "record": record,
+        },
+        timeout=30,
+    )
+    r.raise_for_status()
+    return r.json()
+
+
+# --------------------
+# Main
+# --------------------
 def main():
     handle = require_env("BLUESKY_HANDLE")
     app_pw = require_env("BLUESKY_APP_PASSWORD")
     openai_key = require_env("OPENAI_API_KEY")
-    model = os.getenv("OPENAI_MODEL") or "gpt-5.2"
+    model = os.getenv("OPENAI_MODEL") or "gpt-4o-mini"
 
-    print("Handle:", handle)
+    print("Posting as:", handle)
 
     post_text = openai_generate_post(openai_key, model)
     print("Generated post:", post_text)
@@ -100,13 +165,14 @@ def main():
     session = bluesky_create_session(handle, app_pw)
     print("Session DID:", session["did"])
 
-    access_jwt = session["accessJwt"]
-    repo_did = session["did"]
+    result = bluesky_create_post(
+        session["accessJwt"],
+        session["did"],
+        post_text,
+    )
 
-    res = bluesky_create_post(access_jwt, repo_did, post_text)
-    print("POST RESULT:", res)
+    print("POSTED:", result.get("uri"))
 
 
 if __name__ == "__main__":
     main()
-
