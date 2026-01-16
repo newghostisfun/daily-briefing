@@ -44,10 +44,11 @@ def openai_generate_post(api_key: str, model: str) -> str:
         "Content-Type": "application/json",
     }
 
-    payload = {
-        "model": model,
-        "input": prompt,
-    }
+payload = {
+    "model": model,
+    "input": prompt,
+    "max_output_tokens": 120
+}
 
    r = requests.post(OPENAI_URL, headers=headers, json=payload, timeout=60)
 
